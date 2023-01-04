@@ -2,19 +2,11 @@
 # From YAML to stringified JSON (fastest) or JsonNode
 #
 # https://github.com/openpeep/nyml | MIT License
-import pkginfo
+
 import std/json
 import nyml/[meta, parser]
 
 export json, parser
-
-when requires "jsony":
-    # By default, Nyml has no built-in serialization.
-    # But, thanks to `pkginfo` we can enable the serialization feature
-    # using `jsony` package library (when current project requires it)
-    # https://github.com/treeform/jsony
-    import jsony
-    export jsony
 
 export meta
 export getInt, getStr, getBool
@@ -60,18 +52,6 @@ proc toJsonStr*[N: Nyml](n: var N, rules:seq[string], prettyPrint = false, inden
     if rules.len != 0:
         doc.setRules(rules)
     result = $doc.get()
-
-when requires "jsony":
-    template ymlParser*(strContents: string, toObject: typedesc[object]): untyped =
-        var yml = Nyml.init(strContents)
-        var p: Parser = yml.parse()
-        if p.hasError():
-            raise newException(NymlException, p.getError)
-        elif p.lex.hasError():
-            raise newException(NymlException, p.lex.getError)
-        else:
-            var parsedContents = p.getContents()
-            parsedContents.fromJson(toObject)
 
 # when isMainModule:
 #     from os import getCurrentDir
